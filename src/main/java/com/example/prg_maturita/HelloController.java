@@ -27,29 +27,49 @@ public class HelloController {
 
 
     Tile[][] tiles = new Tile[8][8];
-    int id = 0;
-    Boolean isDark = false;
+
+    //vygeneruje pole do listu tiles
     public void generateTiles(){
-        for(int col = 0; col < 8; col++) {
-            for(int row = 0; row < 8; row++){
+    int id = 0;
+    Boolean isDark;
 
-                tiles[col][row] = new Tile(col+row, true);
-//dodělaaaaaaaaaaaaaaat
+        for(int row = 0; row < 8; row++){
+            for(int col = 0; col < 8; col++) {
+                isDark = false;
 
+                if((col+row+1)%2 == 0) {
+                    isDark = true;
+                }
+                tiles[row][col] = new Tile(row*8+col, row, col, isDark);
 
             }
+        }
 
+    }
 
+    public void displayTiles(){
+        for (Tile[] sloupec : tiles) {
+            for (Tile t : sloupec) {
+
+                Button btn = t.getButton();
+                //btn.setOnAction( e -> handleTileClick(t));
+                gridPane.add(btn, t.getCol(), t.getRow());
+            }
         }
 
     }
 
 
 
-
     @FXML
     protected void onHelloButtonClick() {
 
+    }
+
+    @FXML
+    public void initialize() {
+        generateTiles();
+        displayTiles();
     }
 
 
