@@ -3,23 +3,7 @@ package com.example.prg_maturita;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-import java.awt.*;
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
-
-import javafx.application.Application;
-import javax.swing.Timer;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.fxml.FXML;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import javafx.scene.control.Button;
-
-import java.awt.*;
 
 public class Tile {
 
@@ -38,7 +22,8 @@ public class Tile {
         this.row = row;
         this.col = col;
         this.button = new Button(null);
-        this.button.setMinSize(135, 135);
+        this.button.setMinSize(100, 100);
+        this.button.setMaxSize(100, 100);
         this.isDark = isDark;
 
         //nastavení grafiky políčka
@@ -70,8 +55,8 @@ public class Tile {
     //načtení obrázku na button
     private ImageView imageView(Image image) {
         ImageView imageView = new ImageView(image);
-        imageView.setFitHeight(135);
-        imageView.setFitWidth(135);
+        imageView.setFitHeight(100);
+        imageView.setFitWidth(100);
         imageView.setPreserveRatio(true); //
         return imageView;
     }

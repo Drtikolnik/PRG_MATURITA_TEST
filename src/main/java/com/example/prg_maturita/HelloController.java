@@ -23,7 +23,7 @@ public class HelloController {
     private Label welcomeText;
 
     @FXML
-    private GridPane gridPane;
+    private GridPane deska;
 
 
     Tile[][] tiles = new Tile[8][8];
@@ -53,7 +53,7 @@ public class HelloController {
 
                 Button btn = t.getButton();
                 //btn.setOnAction( e -> handleTileClick(t));
-                gridPane.add(btn, t.getCol(), t.getRow());
+                deska.add(btn, t.getCol(), t.getRow());
             }
         }
 
