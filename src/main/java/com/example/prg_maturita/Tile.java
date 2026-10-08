@@ -32,12 +32,12 @@ public class Tile {
             if(row==0||row==1||row==2){
                 this.tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_light.png");
                 this.tileState = 1;
-                this.isDarkPlayer = true;
+                this.isDarkPlayer = false;
 
             }else if(row==5||row==6||row==7) {
                 this.tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_dark.png");
                 this.tileState = 1;
-                this.isDarkPlayer = false;
+                this.isDarkPlayer = true;
             }else{
                 this.tileImage = loadImage("/com/example/prg_maturita/imgs/dark.png");
                 this.tileState = 0;
@@ -68,21 +68,20 @@ public class Tile {
         return imageView;
     }
 
-    public void outlineTile(Tile tile){
-        if(tile.isDarkPlayer==null){
-            if(tile.isDarkTile){
-                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_outlined.png");
-            }
-        }else if(tile.isDarkPlayer==true){
-            if(tile.tileState==1){
+    //graficky obtáhne políčko
+    public void outlineTile(){
+        if(this.tileState==0){
+            tileImage = loadImage("/com/example/prg_maturita/imgs/dark_outlined.png");
+        }else if(this.isDarkPlayer==true){
+            if(this.tileState==1){
                 tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_dark_outlined.png");
-            }else if(tile.tileState==2){
+            }else if(this.tileState==2){
                 tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_dark_outlined.png");
             }
-        }else{
-            if(tile.tileState==1){
+        }else if(this.isDarkPlayer==false){
+            if(this.tileState==1){
                 tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_light_outlined.png");
-            }else if(tile.tileState==2){
+            }else if(this.tileState==2){
                 tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_light_outlined.png");
             }
         }
@@ -90,8 +89,24 @@ public class Tile {
 
     }
 
-    public void unOutlineTile(Tile tile){
-
+    //zruší obtáhnutí políčka
+    public void clearOutlineTile(){
+        if(this.tileState==0){
+            tileImage = loadImage("/com/example/prg_maturita/imgs/dark.png");
+        }else if(this.isDarkPlayer==true){
+            if(this.tileState==1){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_dark.png");
+            }else if(this.tileState==2){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_dark.png");
+            }
+        }else if(this.isDarkPlayer==false){
+            if(this.tileState==1){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_light.png");
+            }else if(this.tileState==2){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_light.png");
+            }
+        }
+        button.setGraphic(imageView(tileImage));
     }
 
 
