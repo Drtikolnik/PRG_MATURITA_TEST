@@ -2,19 +2,7 @@ package com.example.prg_maturita;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.fxml.FXML;
 
 import javafx.scene.control.Button;
 
@@ -31,7 +19,7 @@ public class HelloController {
     //vygeneruje pole do listu tiles
     public void generateTiles(){
     int id = 0;
-    Boolean isDark;
+    boolean isDark;
 
         for(int row = 0; row < 8; row++){
             for(int col = 0; col < 8; col++) {
@@ -52,24 +40,40 @@ public class HelloController {
             for (Tile t : sloupec) {
 
                 Button btn = t.getButton();
-                //btn.setOnAction( e -> handleTileClick(t));
+                btn.setOnAction( e -> handleTileClick(t));
                 deska.add(btn, t.getCol(), t.getRow());
             }
         }
 
     }
 
+    public void disableLightTiles(){
+        for (Tile[] sloupec : tiles) {
+            for (Tile t : sloupec) {
+                Button btn = t.getButton();
+                if(!t.getDarkTile()){
+                    btn.setDisable(true);
+                    btn.setStyle("-fx-opacity: 1.0;");
+                }
+
+            }
+        }
+    }
+
+
+
 
 
     @FXML
-    protected void onHelloButtonClick() {
-
+    protected void handleTileClick(Tile tile) {
+        System.out.println("Tile Clicked");
     }
 
     @FXML
     public void initialize() {
         generateTiles();
         displayTiles();
+        disableLightTiles();
     }
 
 

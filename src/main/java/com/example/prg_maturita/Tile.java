@@ -11,29 +11,36 @@ public class Tile {
     private int row;
     private int col;
     private Button button;
-    private Boolean isDark;
-    private final Image tileImage;
+    private boolean isDarkTile;
+    private Boolean isDarkPlayer;
+    private Image tileImage;
 
-    private Boolean hasKamen;
-    private Boolean hasDama;
+    private int tileState = 0;// 0==nemá figurku | 1==má kámen | 2==má dámu
 
-    public Tile(int id, int row, int col, Boolean isDark){
+
+    public Tile(int id, int row, int col, boolean isDarkTile) {
         this.id = id;
         this.row = row;
         this.col = col;
         this.button = new Button(null);
         this.button.setMinSize(100, 100);
         this.button.setMaxSize(100, 100);
-        this.isDark = isDark;
+        this.isDarkTile = isDarkTile;
 
         //nastavení grafiky políčka
-        if(isDark){
+        if(isDarkTile){
             if(row==0||row==1||row==2){
                 this.tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_light.png");
+                this.tileState = 1;
+                this.isDarkPlayer = true;
+
             }else if(row==5||row==6||row==7) {
                 this.tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_dark.png");
+                this.tileState = 1;
+                this.isDarkPlayer = false;
             }else{
                 this.tileImage = loadImage("/com/example/prg_maturita/imgs/dark.png");
+                this.tileState = 0;
             }
 
         }else{
@@ -59,6 +66,32 @@ public class Tile {
         imageView.setFitWidth(100);
         imageView.setPreserveRatio(true); //
         return imageView;
+    }
+
+    public void outlineTile(Tile tile){
+        if(tile.isDarkPlayer==null){
+            if(tile.isDarkTile){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_outlined.png");
+            }
+        }else if(tile.isDarkPlayer==true){
+            if(tile.tileState==1){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_dark_outlined.png");
+            }else if(tile.tileState==2){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_dark_outlined.png");
+            }
+        }else{
+            if(tile.tileState==1){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_light_outlined.png");
+            }else if(tile.tileState==2){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_light_outlined.png");
+            }
+        }
+        button.setGraphic(imageView(tileImage));
+
+    }
+
+    public void unOutlineTile(Tile tile){
+
     }
 
 
@@ -94,31 +127,37 @@ public class Tile {
         this.button = button;
     }
 
-    public Boolean getIsDark() {
-        return isDark;
+    public boolean getDarkTile() {
+        return isDarkTile;
     }
 
-    public void setIsDark(Boolean dark) {
-        isDark = dark;
+    public void setDarkTile(boolean darkTile) {
+        this.isDarkTile = darkTile;
+    }
+
+    public Boolean getDarkPlayer() {
+        return isDarkPlayer;
+    }
+
+    public void setDarkPlayer(Boolean darkPlayer) {
+        this.isDarkPlayer = darkPlayer;
+    }
+
+    public int getTileState() {
+        return tileState;
     }
 
     public Image getTileImage() {
         return tileImage;
     }
 
-    public Boolean getHasKamen() {
-        return hasKamen;
+    public void setTileState(int state) {
+        if(state==0||state==1||state==2){
+            this.tileState = state;
+        }else{
+            System.err.println("Invalid tile state");
+        }
     }
 
-    public void setHasKamen(Boolean hasKamen) {
-        this.hasKamen = hasKamen;
-    }
 
-    public Boolean getHasDama() {
-        return hasDama;
-    }
-
-    public void setHasDama(Boolean hasDama) {
-        this.hasDama = hasDama;
-    }
 }
