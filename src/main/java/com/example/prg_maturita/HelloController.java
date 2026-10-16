@@ -20,8 +20,11 @@ public class HelloController {
     int[][] directions = new int[4][7];
     ArrayList<Tile> jumpableTiles = new ArrayList<>();
 
+    private Tile checkerTile;
+    private Tile destinationTile;
 
-    //vygeneruje pole do listu tiles
+
+    //vygeneruje policka do listu tiles
     public void generateTiles(){
     int id = 0;
     boolean isDark;
@@ -40,6 +43,7 @@ public class HelloController {
 
     }
 
+    //zobrazo policka
     public void displayTiles(){
         for (Tile[] sloupec : tiles) {
             for (Tile t : sloupec) {
@@ -52,6 +56,7 @@ public class HelloController {
 
     }
 
+    //vypne svetle policka/tlacitka
     public void disableLightTiles(){
         for (Tile[] sloupec : tiles) {
             for (Tile t : sloupec) {
@@ -71,17 +76,48 @@ public class HelloController {
     protected void handleTileClick(Tile tile) {
         //System.out.println("Tile Clicked");
         //tile.outlineTile();
-        for(Tile jumpable : jumpableTiles){
-            jumpable.clearOutlineTile();
-        }
-        if (tile.getTileState()!=0) {
-            calculateDirections(tile);
-            addJumpableTiles();
-            for(Tile jumpable : jumpableTiles){
-                jumpable.outlineTile();
+
+        //pokud klikne na označené pole
+        if(tile.isOutlined()){
+            destinationTile = tile;
+            clearAllOutlines();
+
+            moveTile(checkerTile, destinationTile);
+        }else{
+            //pokud klikne an fugurku nebo prazdny tile
+            clearAllOutlines();
+            if (tile.getTileState()!=0) {
+                checkerTile = tile;
+                calculateDirections(checkerTile );
+                addJumpableTiles();
+                for(Tile jumpable : jumpableTiles){
+                    jumpable.outlineTile();
+                }
             }
         }
 
+
+
+    }
+
+
+    public void clearAllOutlines(){
+        for(Tile jumpable : jumpableTiles){
+            jumpable.clearOutlineTile();
+        }
+    }
+
+    public void moveTile(Tile checkerTile, Tile destinationTile) {
+
+        destinationTile.setTileState(checkerTile.getTileState());
+        destinationTile.setDarkPlayer(checkerTile.getDarkPlayer());
+        destinationTile.updateTileImage();
+
+        checkerTile.setTileState(0);
+        checkerTile.setDarkPlayer(null);
+
+        destinationTile.updateTileImage();
+        checkerTile.updateTileImage();
     }
 
 

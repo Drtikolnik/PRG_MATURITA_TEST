@@ -12,6 +12,7 @@ public class Tile {
     private int col;
     private Button button;
     private boolean isDarkTile;
+    private boolean isOutlined;
     private Boolean isDarkPlayer;
     private Image tileImage;
 
@@ -68,6 +69,28 @@ public class Tile {
         return imageView;
     }
 
+    //aktualizuje grafiku políčka
+    public void updateTileImage(){
+        if(this.tileState==0){
+            tileImage = loadImage("/com/example/prg_maturita/imgs/dark.png");
+        }else if(this.isDarkPlayer==true){
+            if(this.tileState==1){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_dark.png");
+            }else if(this.tileState==2){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_dark.png");
+            }
+
+        }else if(this.isDarkPlayer==false){
+            if(this.tileState==1){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_light.png");
+            }else if(this.tileState==2){
+                tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_light.png");
+            }
+        }
+        button.setGraphic(imageView(tileImage));
+
+    }
+
     //graficky obtáhne políčko
     public void outlineTile(){
         if(this.tileState==0){
@@ -78,6 +101,7 @@ public class Tile {
             }else if(this.tileState==2){
                 tileImage = loadImage("/com/example/prg_maturita/imgs/dark_dama_dark_outlined.png");
             }
+
         }else if(this.isDarkPlayer==false){
             if(this.tileState==1){
                 tileImage = loadImage("/com/example/prg_maturita/imgs/dark_kamen_light_outlined.png");
@@ -86,6 +110,7 @@ public class Tile {
             }
         }
         button.setGraphic(imageView(tileImage));
+        isOutlined = true;
 
     }
 
@@ -107,6 +132,7 @@ public class Tile {
             }
         }
         button.setGraphic(imageView(tileImage));
+        isOutlined = false;
     }
 
 
@@ -158,6 +184,15 @@ public class Tile {
         this.isDarkPlayer = darkPlayer;
     }
 
+
+    public boolean isOutlined() {
+        return isOutlined;
+    }
+
+    public void setOutlined(boolean outlined) {
+        isOutlined = outlined;
+    }
+
     public int getTileState() {
         return tileState;
     }
@@ -165,6 +200,7 @@ public class Tile {
     public Image getTileImage() {
         return tileImage;
     }
+
 
     public void setTileState(int state) {
         if(state==0||state==1||state==2){
