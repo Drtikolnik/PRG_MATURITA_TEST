@@ -42,6 +42,7 @@ public class Tile {
             }else{
                 this.tileImage = loadImage("/com/example/prg_maturita/imgs/dark.png");
                 this.tileState = 0;
+                this.isDarkPlayer = null;
             }
 
         }else{
