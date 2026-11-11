@@ -22,6 +22,11 @@ public class HelloController {
     private Tile checkerTile;
     private Tile destinationTile;
 
+    private int NORMAL = 0; // normální tah, hraac hybe figurkama a nikoho nepreskakuje
+    private int FORCED_PICK_PIECE = 1; // detekovan forced jump, hrac musi vybrtat se kterou figurkou chce jump provest
+    private int FORCED_PICK_TARGET = 2; // hrac uz figurku vybral, ted vybira kam s figurkou bude tahnout
+    private int gameState = NORMAL; //
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //vygeneruje policka do listu tiles
@@ -45,8 +50,8 @@ public class HelloController {
 
     //zobrazi policka
     public void displayTiles(){
-        for (Tile[] sloupec : tiles) {
-            for (Tile t : sloupec) {
+        for (Tile[] row : tiles) {
+            for (Tile t : row) {
 
                 Button btn = t.getButton();
                 btn.setOnAction( e -> handleTileClick(t));
@@ -58,8 +63,8 @@ public class HelloController {
 
     //vypne svetle policka/tlacitka
     public void disableLightTiles(){
-        for (Tile[] sloupec : tiles) {
-            for (Tile t : sloupec) {
+        for (Tile[] row : tiles) {
+            for (Tile t : row) {
                 Button btn = t.getButton();
                 if(!t.getDarkTile()){
                     btn.setDisable(true);
@@ -76,34 +81,83 @@ public class HelloController {
     protected void handleTileClick(Tile tile) {
         //System.out.println("Tile Clicked");
         //tile.outlineTile();
+        if (gameState == FORCED_PICK_PIECE) { // hrac musi vybrat s jakou figurkou udela forced jump - // presmerovani z startturn
 
-
-        if (tile.isOutlined()) { //pokud klikne na označené pole
-            destinationTile = tile;
-            clearAllOutlines();
-
-            moveTile(checkerTile, destinationTile);
-            playerDark = !playerDark;
-        } else { //pokud klikne an fugurku nebo prazdny tile
-            clearAllOutlines();
-            if (tile.getTileState() != 0) { //pokiud tile neni prazdny
+            if (forcedTiles.contains(tile)) { // pokud klikl na jeden z forced podsvicenych figurek
                 checkerTile = tile;
-                calculateDirections(checkerTile);
-                addJumpableTiles();
-                for (Tile jumpable : jumpableTiles) {
-                    jumpable.outlineTile();
+                clearAllOutlines(); // odoutlinene vsechny popdsvicene figurky
+                checkerTile.outlineTile();
+                addJumpableForcedTiles(checkerTile); // spocita a prida do jumpable tiles cile/mozna policka
+                outlineTiles(jumpableTiles); // otlninene policka kam muze hrac tahnout
+                gameState = FORCED_PICK_TARGET; // zmeni se stav tahu
+            }
+            // pokud klikl na neco jineho nic se nestane
+
+        }else if  (gameState == FORCED_PICK_TARGET) { // hrac musi vybrat na jeke policko udela forced jump
+
+            if (jumpableTiles.contains(tile)) { // pokud klikne na policko
+                System.out.println("Skok na id " + tile.getId() + " (BOD 3 zatím není hotový)");
+            } else { // pokud ne - zpatky na forced pick piece
+                clearAllOutlines();
+                jumpableTiles.clear();
+                checkerTile = null;
+                outlineTiles(forcedTiles);
+                gameState = FORCED_PICK_PIECE;
+            }
+
+        }else{ // NORMAL - jen hybe jakoukoli figurkou
+
+            if (tile.isOutlined()) { //pokud klikne na označené pole
+                destinationTile = tile;
+                clearAllOutlines();
+
+                moveTile(checkerTile, destinationTile);
+                playerDark = !playerDark;
+                startTurn();
+            } else { //pokud klikne an neoznacenou fugurku nebo na prazdny tile
+                clearAllOutlines();
+                if (tile.getTileState() != 0) { //pokiud tile neni prazdny
+                    checkerTile = tile;
+                    calculateDirections(checkerTile);
+                    addJumpableTiles();
+                    outlineTiles(jumpableTiles);
                 }
             }
+
+        }
+
+
+    }
+
+    public void startTurn() { //zzz
+        //clearAllOutlines();          // zhasne podsvícení z minulého kola
+        //jumpableTiles.clear();
+        checkerTile = null;
+
+        findForcedTiles(); // prohleda pole a nalezy da do pole forcedtiles
+
+        if (forcedTiles.isEmpty()) { // pokud nic nenaslo
+            gameState = NORMAL; // normalni tah
+        } else {// pokud ano
+            outlineTiles(forcedTiles); // zobrazi to hracovi
+            gameState = FORCED_PICK_PIECE; // hrac musi vybrat figurku se kterou forced jump udela
         }
     }
 
 
-
+    public void outlineTiles(ArrayList<Tile> list) {
+        for (Tile t : list) {
+            t.outlineTile();
+        }
+    }
 
 
     public void clearAllOutlines(){
         for(Tile jumpable : jumpableTiles){
             jumpable.clearOutlineTile();
+        }
+        for (Tile forced : forcedTiles) {
+            forced.clearOutlineTile();
         }
     }
 
@@ -129,18 +183,18 @@ public class HelloController {
         }
 
         //leva nahore, prava nahore, leva dole, prava dole
-        int[] krok    = {-9, -7, 7, 9};      // o kolik se změní id
-        int[] sloupec = {-1, 1, -1, 1};      // o kolik se změní sloupec
+        int[] krok = {-9, -7, 7, 9}; // o kolik se zmeni id
+        int[] sloupec = {-1, 1, -1, 1}; // o kolik se zmeni sloupec
 
         for (int strana = 0; strana < 4; strana++) { //pro každou diagonalni stranu
             int id = tile.getId();// nacte se id aktualniho tilu
             int col = tile.getCol();//nacte se col tilu pro kontrolu
 
             for (int mistoVListu = 0; mistoVListu < 7; mistoVListu++) { // pro kazde misto 1-7 v jedne strane
-                id = id + krok[strana];
+                id = id + krok[strana]; //vypocita id
                 col = col + sloupec[strana];
 
-                if (id < 0 || id > 63 || col < 0 || col > 7) { // pokud je id mimo desku
+                if (id<0 || id>63 || col<0 || col>7) { // pokud je id mimo desku
                     //nic se nestane
                 }else{ // pokud je validni
                     directions[strana][mistoVListu] = id; // ulozi se do directions
@@ -155,14 +209,16 @@ public class HelloController {
         return tiles[id / 8][id % 8]; //vypocita row a col na desce z id
     }
 
-    public boolean hasForcedJump(Tile tile) {
+    public boolean hasForcedJump(Tile tile) { // zkontroluje  jestli dany tile musi udelat forced jump
+        jumpableTiles.clear();
         calculateDirections(tile);  // spocita directions pro tuhle figurku
+
 
         if(tile.getTileState() == 1){ // pokud kamen
             // tmavy hrac jde nahoru (0 a 1)  svetly dolu (2 a 3)
-            int prvniStrana = 0;
+            int prvniStrana = 0; // pokud tmavy
             if (!tile.getDarkPlayer()) {
-                prvniStrana = 2;
+                prvniStrana = 2; // pokud svetly
             }
 
             for (int strana = prvniStrana; strana < prvniStrana + 2; strana++) {
@@ -175,6 +231,7 @@ public class HelloController {
 
                     // pukud je sousedni policko figruka a je soupere && pokud je policko za nim volne
                     if ((sousedni.getTileState()!=0 && sousedni.getDarkPlayer()!=tile.getDarkPlayer()) && (zaSousednim.getTileState()==0)) {
+                        jumpableTiles.add(zaSousednim); // ted zybtecne a v findforcedtiles se hned vymaze, ale je to potrebne pro addjumpableforcedtiles
                         return true; // byl nalezen forced skok
                     }
                 }
@@ -196,6 +253,7 @@ public class HelloController {
 
                 if (t.getTileState()!=0 && t.getDarkPlayer()==playerDark) { // pokud je to figurka a je hrace na tahu
                     if (hasForcedJump(t)) {
+                        jumpableTiles.clear();
                         forcedTiles.add(t);
                     }
                 }
@@ -239,6 +297,10 @@ public class HelloController {
 
     }
 
+    public void addJumpableForcedTiles(Tile tile) {
+        //jumpableTiles.clear(); - nemusi byt tady, je uz v hasforcedjump
+        hasForcedJump(tile);
+    }
 
 
 
@@ -249,8 +311,11 @@ public class HelloController {
         disableLightTiles();
 
         //zkouska
-        findForcedTiles();
-        System.out.println("Figurky, které musí skákat: " + forcedTiles.size());
+        tiles[4][3].setTileState(1);
+        tiles[4][3].setDarkPlayer(false);
+        tiles[4][3].updateTileImage();
+
+        startTurn();
     }
 
 
