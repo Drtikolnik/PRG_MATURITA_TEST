@@ -153,7 +153,7 @@ public class HelloController {
         checkForGameOver();
     }
 
-    public void checkForGameOver(){
+    public void checkForGameOver(){ // zkontroluje jestli ma hra zkoncit a ukonci ji
         int pocetDark = 0;
         int pocetLight = 0;
 
