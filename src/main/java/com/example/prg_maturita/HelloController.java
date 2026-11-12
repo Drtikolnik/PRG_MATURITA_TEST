@@ -149,6 +149,37 @@ public class HelloController {
             outlineTiles(forcedTiles); // zobrazi to hracovi
             gameState = FORCED_PICK_PIECE; // hrac musi vybrat figurku se kterou forced jump udela
         }
+
+        checkForGameOver();
+    }
+
+    public void checkForGameOver(){
+        int pocetDark = 0;
+        int pocetLight = 0;
+
+        for (Tile[] row : tiles) {
+            for (Tile t : row) {
+                if (t.getTileState() != 0) {//pokud policko je figurka a neni prazdne
+                    if (t.getDarkPlayer()) { // pokud je figurka tmaveho hrace
+                        pocetDark++; // pripocteme bod pro tmaveho hrace
+                    } else if (!t.getDarkPlayer()) { // pokud e figurka svetleho hrace
+                        pocetLight++; // pripocteme bod pro svetleho hrace
+                    }
+                }
+            }
+        }
+
+        if (pocetDark == 0) {
+            System.out.println("HRA SKONČILA: VYHRÁL TMAVÝ HRÁČ!");
+            System.exit(0);
+        }
+        if (pocetLight == 0) {
+            System.out.println("HRA SKONČILA: VYHRÁL SVĚTLÝ HRÁČ!");
+            System.exit(0);
+        }
+
+
+
     }
 
 
@@ -174,6 +205,7 @@ public class HelloController {
     }
 
 
+    /*
     public void jumpTile(Tile from, Tile to) {// pro preskoceni figurky
         clearAllOutlines(); // odoutlinene cilova policka
         jumpableTiles.clear(); // pro jistotu vymaze jumppabvle tiles
@@ -185,6 +217,66 @@ public class HelloController {
         sebrany.setTileState(0);       // přeskočený soupeř zmizí
         sebrany.setDarkPlayer(null);
         sebrany.updateTileImage();
+
+        // overuje jestli ta sama figurka musi skakat znovu
+        forcedTiles.clear();
+        addJumpableForcedTiles(to); // ulozi forced tiles do seznamu jumpableTiles pokud nejaky je
+        if (!jumpableTiles.isEmpty()) { // pokud jumpabletiles neni prazny aka pokud figurka musi skakat znovu
+            jumpableTiles.clear(); // znovu vymaze policka z jumpable tiles
+
+            forcedTiles.add(to); // prida figurku do seznamu forcedtiles
+            outlineTiles(forcedTiles); // oznaci ji
+            gameState = FORCED_PICK_PIECE;// prepna na game mod kde hrac musi vybrat s jakou figurkou skoci
+        } else { // pokud nema dalsi forced jumps
+            ukoncitKolo(); // konec tahu, zacne dalsi kolo
+        }
+    }
+
+    */
+    public void jumpTile(Tile from, Tile to) {// pro preskoceni figurky
+        clearAllOutlines(); // odoutlinene cilova policka
+        jumpableTiles.clear(); // pro jistotu vymaze jumppabvle tiles
+
+        int stavPredTahem = from.getTileState(); // ulozime, jestli skace kamen (1) nebo uz dama (2)
+
+        // najde preskocenou figurku mezi from a to (funguje pro kamen i pro damu)
+        int smerRow = 1;
+        if (to.getRow() < from.getRow()) {
+            smerRow = -1;
+        }
+        int smerCol = 1;
+        if (to.getCol() < from.getCol()) {
+            smerCol = -1;
+        }
+
+        Tile sebrany = null;
+        int r = from.getRow() + smerRow;
+        int c = from.getCol() + smerCol;
+        for (int i = 0; i < 7; i++) {
+            if (r == to.getRow() && c == to.getCol()) {
+                break;
+            }
+            if (tiles[r][c].getTileState() != 0) {
+                sebrany = tiles[r][c];
+                break;
+            }
+            r = r + smerRow;
+            c = c + smerCol;
+        }
+
+        moveTile(from, to);            // BOD 3: kámen se přesune
+
+        if (sebrany != null) {
+            sebrany.setTileState(0);       // přeskočený soupeř zmizí
+            sebrany.setDarkPlayer(null);
+            sebrany.updateTileImage();
+        }
+
+        // pokud se kamen prave zmenil v damu, tah podle pravidel ceske damy konci
+        if (stavPredTahem == 1 && to.getTileState() == 2) {
+            ukoncitKolo();
+            return;
+        }
 
         // overuje jestli ta sama figurka musi skakat znovu
         forcedTiles.clear();
@@ -282,6 +374,35 @@ public class HelloController {
 
         }else if(tile.getTileState() == 2){ // pokud dama
             //////dama dodelat
+            for (int strana = 0; strana < 4; strana++) { // dama muze skakat do vsech 4 stran
+                boolean naselSoupere = false;
+
+                for (int mistoVListu = 0; mistoVListu < 7; mistoVListu++) {
+                    int id = directions[strana][mistoVListu];
+
+                    if (id == -1) { // mimo desku
+                        break;
+                    }
+
+                    Tile policko = getTileById(id);
+
+                    if (!naselSoupere) { // hledame prvni figurku v ceste
+                        if (policko.getTileState() == 0) {
+                            // prazdne policko pred souperem, pokracujeme dal
+                        } else if (policko.getDarkPlayer() != barvaHrace) {
+                            naselSoupere = true; // nasli jsme soupere, ted hledame volna policka za nim
+                        } else {
+                            break; // vlastni figurka blokuje cestu
+                        }
+                    } else { // uz jsme preskocili soupere, pridavame vsechna volna policka za nim
+                        if (policko.getTileState() == 0) {
+                            jumpableTiles.add(policko);
+                        } else {
+                            break; // dalsi figurka za souperem blokuje doskok
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -339,6 +460,23 @@ public class HelloController {
 
         }if(tile.getTileState() == 2){
             ///////dama dodelat
+            for (int strana = 0; strana < 4; strana++) { // dama muze chodit do vsech 4 stran
+                for (int mistoVListu = 0; mistoVListu < 7; mistoVListu++) {
+                    int id1 = directions[strana][mistoVListu];
+
+                    if (id1 == -1) { // mimo desku
+                        break;
+                    }
+
+                    Tile to = getTileById(id1);
+
+                    if (to.getTileState() == 0) {
+                        jumpableTiles.add(to); // volne policko pridame a pokracujeme dal
+                    } else {
+                        break; // narazili jsme na figurku, dal jit nemuze
+                    }
+                }
+            }
         }
 
 
